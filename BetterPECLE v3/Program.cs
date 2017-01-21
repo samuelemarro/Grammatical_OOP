@@ -38,23 +38,23 @@ namespace BetterPECLE_v3
             }*/
             //object result = Executor.Execute(new ExecutionParameters("namespace A{ public class B{ public int C() { PECLECODE }}}", "A.B", "C"), "return 1;");
             //object o = ReadFromBinaryFile<GeneticAlgorithmResult>(@"C:\Users\Samuele\Documents\BetterPECLE\v3\Default\0.pecle");
-            ExtractData(250, 1, @"C:\Users\Samuele\Documents\BetterPECLE\v3", 20, 50, 20, 100);
-            /*List<GeneticAlgorithmResult> results = OpenResults(@"C:\Users\Samuele\Documents\BetterPECLE\v3\T\PECLE");
+            //ExtractData(250, 1, @"C:\Users\Samuele\Documents\BetterPECLE\v3", 20, 50, 20, 100);
+            List<GeneticAlgorithmResult> results = OpenResults(@"C:\Users\Samuele\Documents\BetterPECLE\v3\Default");
 
-            double initialMaxFitness = results.Select(x => x.stats[0].MaxFitness).Average();
-            double initialMinFitness = results.Select(x => x.stats[0].MinFitness).Average();
-            double finalMaxFitness = results.Select(x => x.stats[49].MaxFitness).Average();
-            double finalMinFitness = results.Select(x => x.stats[49].MinFitness).Average();
+            double initialMaxFitness = results.Select(x => x.stats[1].MaxFitness).Average();
+            double initialMinFitness = results.Select(x => x.stats[1].MinFitness).Average();
+            double finalMaxFitness = results.Select(x => x.stats[48].MaxFitness).Average();
+            double finalMinFitness = results.Select(x => x.stats[48].MinFitness).Average();
 
-            double averageDifference = results.Select(x => x.stats[49].MaxFitness - x.stats[0].MaxFitness).Average();
+            double averageDifference = results.Select(x => x.stats[48].MaxFitness - x.stats[1].MaxFitness).Average();
 
             List<List<double>> relativeErrors = results.Select(x => x.stats.Select(y => (y.executionExceptions + y.compilationErrors + y.failedErrorCorrections) / y.executedEvaluations).ToList()).ToList();
             List<double> relativeErrors2 = relativeErrors.Select(x => x.Average()).ToList();
             double finalRelativeError = relativeErrors2.Average();
-            */
-            /*double errorImprovement = results.Select(x => (x.stats[49].generationErrors / x.stats[49].executedEvaluations) - (x.stats[0].generationErrors / x.stats[0].executedEvaluations)).Average();
             
-            GeneticAlgorithmResult averageResult = AverageResults(results);*/
+            double errorImprovement = results.Select(x => (x.stats[48].generationErrors / x.stats[48].executedEvaluations) - (x.stats[0].generationErrors / x.stats[0].executedEvaluations)).Average();
+            
+            GeneticAlgorithmResult averageResult = AverageResults(results);
         }
 
         private static List<GeneticAlgorithmResult> OpenResults(string path)
@@ -109,7 +109,7 @@ namespace BetterPECLE_v3
             {
 
                 executionCount++;
-                int elitismSize = GrammaticalEvolution.random.Next(0, 5);
+                int elitismSize = GrammaticalEvolution.random.Next(1, 5);
                 int tournamentSize = GrammaticalEvolution.random.Next(2, 6);
                 double crossoverProbability = GrammaticalEvolution.random.NextDouble();
                 double mutationProbability = GrammaticalEvolution.random.NextDouble();
@@ -186,43 +186,27 @@ namespace BetterPECLE_v3
     [Serializable]
     public class OneMaxGO : GrammaticalObject, ISerializable
     {
-        public int codeCounter;
-        public int conditionCounter;
-        public int valueCounter;
-
         public const int maxSelfReferenceDepth = 5;
         public const int arraySize = 64;
         public const string genericCodeWrapper = "namespace CodeExecutor{public class Executor{public TYPE Execute(){\n PECLECODE \n}}}";
 
         public override GrammaticalObject GetClone()
         {
-            OneMaxGO go = new OneMaxGO(codeCounter, conditionCounter, valueCounter);
+            OneMaxGO go = new OneMaxGO();
 
             return go;
         }
 
         public OneMaxGO() { }
-
-        public OneMaxGO(int codeCounter, int conditionCounter, int valueCounter)
-        {
-            this.codeCounter = codeCounter;
-            this.conditionCounter = conditionCounter;
-            this.valueCounter = valueCounter;
-        }
+        
 
         protected OneMaxGO(SerializationInfo info, StreamingContext context)
         {
-            codeCounter = info.GetInt32("codeCounter");
-            conditionCounter = info.GetInt32("conditionCounter");
-            valueCounter = info.GetInt32("valueCounter");
         }
 
         [SecurityPermission(SecurityAction.LinkDemand, Flags = SecurityPermissionFlag.SerializationFormatter)]
         void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
         {
-            info.AddValue("codeCounter", codeCounter);
-            info.AddValue("conditionCounter", conditionCounter);
-            info.AddValue("valueCounter", valueCounter);
         }
 
         public override Dictionary<string, List<ProductionRule>> GetInitialProductionRules()
@@ -231,7 +215,7 @@ namespace BetterPECLE_v3
             {
                 { "code", new List<ProductionRule>()
                 {
-                    new ProductionRule(new ObjectAction<OneMaxGO>(go => go.codeCounter++),new ErrorCheck<OneMaxGO>(go => go.codeCounter <= maxSelfReferenceDepth), new NonTerminal("codeImplementation", (go => go.CreateChild<OneMaxGO>())), new ObjectAction<OneMaxGO>(go => go.codeCounter--))
+                    new ProductionRule(new NonTerminal("codeImplementation", (go => go.CreateChild<OneMaxGO>())))
                 }},
                 { "codeImplementation", new List<ProductionRule>()
                 {
@@ -248,10 +232,6 @@ namespace BetterPECLE_v3
                     new ProductionRule((Terminal)"c")
                 }},
                 { "condition", new List<ProductionRule>()
-                {
-                    new ProductionRule(new ObjectAction<OneMaxGO>(go => go.conditionCounter++), new ErrorCheck<OneMaxGO>(go => go.conditionCounter < maxSelfReferenceDepth), (NonTerminal)"conditionImplementation",new ObjectAction<OneMaxGO>(go => go.conditionCounter--))
-                }},
-                { "conditionImplementation", new List<ProductionRule>()
                 {
                     new ProductionRule((Terminal)"true"),
                     new ProductionRule((Terminal)"false"),
@@ -270,10 +250,6 @@ namespace BetterPECLE_v3
                     new ProductionRule((Terminal)"!=")
                 }},
                 { "value", new List<ProductionRule>()
-                {
-                    new ProductionRule(new ObjectAction<OneMaxGO>(go => go.valueCounter++), new ErrorCheck<OneMaxGO>(go => go.valueCounter < maxSelfReferenceDepth), (NonTerminal)"valueImplementation",new ObjectAction<OneMaxGO>(go => go.valueCounter--))
-                }},
-                { "valueImplementation", new List<ProductionRule>()
                 {
                     new ProductionRule((NonTerminal)"digit"),
                     new ProductionRule((NonTerminal)"variable"),

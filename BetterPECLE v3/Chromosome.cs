@@ -16,6 +16,8 @@ namespace BetterPECLE_v3
 
         public double? Fitness { get; internal set; }
 
+        public bool ReEvaluate { get; internal set; }
+
         public Chromosome(int initialSize, int maximumSize)
         {
             byte[] genes = new byte[initialSize];
@@ -56,6 +58,7 @@ namespace BetterPECLE_v3
                 chromosome.Add(b);
             }
             chromosome.Fitness = Fitness;
+            chromosome.ReEvaluate = ReEvaluate;
 
             chromosome.LastUsedCodonPosition = LastUsedCodonPosition;
             if (BackupCodons != null)

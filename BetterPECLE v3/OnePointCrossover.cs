@@ -35,13 +35,13 @@ namespace BetterPECLE_v3
 
                 if(GrammaticalEvolution.random.NextDouble() > 0.5)
                 {
-                    child1.BackupCodons = parent1.BackupCodons;
-                    child2.BackupCodons = parent2.BackupCodons;
+                    child1.BackupCodons = parent1.BackupCodons == null ? null : parent1.BackupCodons.ToList();
+                    child2.BackupCodons = parent2.BackupCodons == null ? null : parent2.BackupCodons.ToList();
                 }
                 else
                 {
-                    child1.BackupCodons = parent2.BackupCodons;
-                    child2.BackupCodons = parent1.BackupCodons;
+                    child1.BackupCodons = parent2.BackupCodons == null ? null : parent2.BackupCodons.ToList();
+                    child2.BackupCodons = parent1.BackupCodons == null ? null : parent1.BackupCodons.ToList();
                 }
 
                 return new Tuple<Chromosome, Chromosome>(child1, child2);

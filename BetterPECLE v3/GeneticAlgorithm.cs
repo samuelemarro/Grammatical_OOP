@@ -36,15 +36,22 @@ namespace BetterPECLE_v3
         {
             GeneticAlgorithmResult result = new GeneticAlgorithmResult();
             result.stats = new List<GenerationStats>();
-            for (int i = 0; i < generations; i++)
+
+            //Evaluate and save the results of the first generation
+
+            Evaluate(Population.CurrentGeneration);
+
+            Population.CurrentGeneration.Stats.fitnessValues = Population.CurrentGeneration.Select(x => x.Fitness.Value).ToList();
+            Population.CurrentGeneration.Stats.bestChromosome = Population.CurrentGeneration.OrderByDescending(x => x.Fitness).First();
+
+            for (int i = 1; i < generations; i++)
             {
                 Generation newGeneration = new Generation();
-                newGeneration.Stats = new GenerationStats();
 
                 //Finds all the individuals with a valid fitness and takes the best ones
                 int elitesNumber = Math.Min(Population.CurrentGeneration.FindAll(x => x.Fitness.HasValue).Count, ElitismSize);
 
-                List<Chromosome> elites = Population.CurrentGeneration.FindAll(x => x.Fitness.HasValue).OrderBy(x => x.Fitness.Value).Take(elitesNumber).Select(x => x.GetClone()).ToList();
+                List<Chromosome> elites = Population.CurrentGeneration.OrderByDescending(x => x.Fitness.Value).Take(elitesNumber).Select(x => x.GetClone()).ToList();
 
                 int newGenerationSize = Population.CurrentGeneration.Count - elitesNumber;
 
@@ -68,22 +75,22 @@ namespace BetterPECLE_v3
                         newGeneration.Add(children.Item2);
                     }
                 }
+
                 foreach (Chromosome c in newGeneration)
                 {
                     Mutation.Mutate(c, mutationProbability);
                 }
 
-                newGeneration.AddRange(elites);
-
+                Evaluate(newGeneration);
+                
+                Prune(newGeneration, pruningProbability);
                 Duplicate(newGeneration, duplicationProbability);
 
-                Evaluate(newGeneration);
+                newGeneration.AddRange(elites);
 
                 newGeneration.Stats.fitnessValues = newGeneration.Select(x => x.Fitness.Value).ToList();
-                newGeneration.Stats.bestChromosome = newGeneration.OrderByDescending(x => x.Fitness).First();
-
-                Prune(newGeneration, pruningProbability);
-
+                newGeneration.Stats.bestChromosome = newGeneration.OrderByDescending(x => x.Fitness).First().GetClone();
+                
                 Population.Add(newGeneration);
 
                 result.stats.Add(newGeneration.Stats);
@@ -92,9 +99,9 @@ namespace BetterPECLE_v3
         }
 
 
-        private void Prune(Generation generation, double pruningProbability)
+        private void Prune(List<Chromosome> chromosomes, double pruningProbability)
         {
-            foreach (Chromosome chromosome in generation)
+            foreach (Chromosome chromosome in chromosomes)
             {
                 if (GrammaticalEvolution.random.NextDouble() < pruningProbability)
                 {
@@ -106,9 +113,9 @@ namespace BetterPECLE_v3
             }
         }
 
-        private void Duplicate(Generation generation, double duplicationProbability)
+        private void Duplicate(List<Chromosome> chromosomes, double duplicationProbability)
         {
-            foreach (Chromosome chromosome in generation)
+            foreach (Chromosome chromosome in chromosomes)
             {
                 if (GrammaticalEvolution.random.NextDouble() < duplicationProbability)
                 {
@@ -122,7 +129,7 @@ namespace BetterPECLE_v3
                     chromosome.AddRange(newCodons);
 
                     //Duplication can affect the behaviour of the individual if there was an EndOfCodonQueueException, so we mark the chromosome for reevalutation
-                    chromosome.Fitness = new double?();
+                    chromosome.ReEvaluate = true;
                     chromosome.LastUsedCodonPosition = -1;
                 }
             }
@@ -133,9 +140,10 @@ namespace BetterPECLE_v3
         {
             foreach (Chromosome chromosome in generation)
             {
-                if (chromosome.Fitness.HasValue)
+                if (chromosome.Fitness.HasValue && !chromosome.ReEvaluate)
                     continue;
                 generation.Stats.executedEvaluations++;
+                chromosome.ReEvaluate = false;
 
                 GrammaticalEvolution newGE = (GrammaticalEvolution)DeepClone(GE);
                 string code = null;

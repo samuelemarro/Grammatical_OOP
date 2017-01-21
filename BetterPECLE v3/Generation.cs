@@ -9,5 +9,9 @@ namespace BetterPECLE_v3
     public class Generation : List<Chromosome>
     {
         public GenerationStats Stats { get; set; }
+        public Generation() : base()
+        {
+            Stats = new GenerationStats();
+        }
     }
 }
