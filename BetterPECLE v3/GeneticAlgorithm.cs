@@ -44,6 +44,7 @@ namespace BetterPECLE_v3
             Population.CurrentGeneration.Stats.fitnessValues = Population.CurrentGeneration.Select(x => x.Fitness.Value).ToList();
             Population.CurrentGeneration.Stats.bestChromosome = Population.CurrentGeneration.OrderByDescending(x => x.Fitness).First();
 
+            result.stats.Add(Population.CurrentGeneration.Stats);
             for (int i = 1; i < generations; i++)
             {
                 Generation newGeneration = new Generation();

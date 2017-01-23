@@ -39,7 +39,7 @@ namespace BetterPECLE_v3
             //object result = Executor.Execute(new ExecutionParameters("namespace A{ public class B{ public int C() { PECLECODE }}}", "A.B", "C"), "return 1;");
             //object o = ReadFromBinaryFile<GeneticAlgorithmResult>(@"C:\Users\Samuele\Documents\BetterPECLE\v3\Default\0.pecle");
             //ExtractData(250, 1, @"C:\Users\Samuele\Documents\BetterPECLE\v3", 20, 50, 20, 100);
-            List<GeneticAlgorithmResult> results = OpenResults(@"C:\Users\Samuele\Documents\BetterPECLE\v3\Default");
+            /*List<GeneticAlgorithmResult> results = OpenResults(@"C:\Users\Samuele\Documents\BetterPECLE\v3\Default");
 
             double initialMaxFitness = results.Select(x => x.stats[1].MaxFitness).Average();
             double initialMinFitness = results.Select(x => x.stats[1].MinFitness).Average();
@@ -54,7 +54,25 @@ namespace BetterPECLE_v3
             
             double errorImprovement = results.Select(x => (x.stats[48].generationErrors / x.stats[48].executedEvaluations) - (x.stats[0].generationErrors / x.stats[0].executedEvaluations)).Average();
             
-            GeneticAlgorithmResult averageResult = AverageResults(results);
+            GeneticAlgorithmResult averageResult = AverageResults(results);*/
+            List<GeneticAlgorithmResult> results = OpenResults(@"C:\Users\Samuele\Documents\BetterPECLE\v3\PECLE");
+            List<string> lines = new List<string>();
+
+            for(int i = 0; i < results[0].stats.Count; i++)
+            {
+                string line = "";
+                line += results.Select(x => (x.stats[i].compilationErrors) / x.stats[i].executedEvaluations).Average() + "\t";
+                line += results.Select(x => (x.stats[i].executionExceptions) / x.stats[i].executedEvaluations).Average() + "\t";
+                line += results.Select(x => (x.stats[i].failedErrorCorrections) / x.stats[i].executedEvaluations).Average() + "\t";
+
+                line += results.Select(x => x.stats[i].passedErrorChecks / x.stats[i].executedEvaluations).Average() + "\t";
+                line += results.Select(x => x.stats[i].failedErrorChecks / x.stats[i].executedEvaluations).Average() + "\t";
+                line += results.Select(x => x.stats[i].successfulErrorCorrections / x.stats[i].executedEvaluations).Average() + "\t";
+                line += results.Select(x => x.stats[i].failedErrorCorrections / x.stats[i].executedEvaluations).Average() + "\t";
+                lines.Add(line);
+            }
+
+            File.WriteAllLines(@"C:\Users\Samuele\Documents\BetterPECLE\v3\PECLE.csv", lines.Select(x=> x.ToString()).ToArray());
         }
 
         private static List<GeneticAlgorithmResult> OpenResults(string path)
