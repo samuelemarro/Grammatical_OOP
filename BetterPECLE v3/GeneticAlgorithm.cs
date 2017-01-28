@@ -20,6 +20,8 @@ namespace BetterPECLE_v3
         public Selection Selection { get; }
         public ExecutionParameters Parameters { get; }
 
+        public bool SaveChromosomes { get; set; }
+
         public GeneticAlgorithm(int elitismSize, GrammaticalEvolution ge, FitnessCalculator fitnessCalculator, Selection selection, Crossover crossover, Mutation mutation, Population population, ExecutionParameters parameters)
         {
             ElitismSize = elitismSize;
@@ -83,7 +85,7 @@ namespace BetterPECLE_v3
                 }
 
                 Evaluate(newGeneration);
-                
+
                 Prune(newGeneration, pruningProbability);
                 Duplicate(newGeneration, duplicationProbability);
 
@@ -93,6 +95,10 @@ namespace BetterPECLE_v3
                 newGeneration.Stats.bestChromosome = newGeneration.OrderByDescending(x => x.Fitness).First().GetClone();
                 
                 Population.Add(newGeneration);
+                
+                //We remove the chromosomes of older generations (but store their fitness)
+                if (!SaveChromosomes && Population.Count > 1)
+                    Population[Population.Count - 2].Clear();
 
                 result.stats.Add(newGeneration.Stats);
             }
@@ -162,7 +168,7 @@ namespace BetterPECLE_v3
                     generationException = e;
                     generation.Stats.generationErrors++;
                 }
-                catch(GrammaticalEvolution.EndOfCodonQueueException e)
+                catch (GrammaticalEvolution.EndOfCodonQueueException e)
                 {
                     generationException = e;
                     generation.Stats.generationErrors++;

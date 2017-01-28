@@ -12,10 +12,10 @@ namespace BetterPECLE_v3
 {
     class Program
     {
+        public const string genericCodeWrapper = "namespace CodeExecutor{public class Executor{public TYPE Execute(){\n PECLECODE \n}}}";
+
         static void Main(string[] args)
         {
-
-
             /*GrammaticalEvolution ge = new GrammaticalEvolution();
             ge.BluePrintGOs = new List<GrammaticalObject>() { new OneMaxGO_NoImprovements() };
             ge.StartingGO = new OneMaxGO_NoImprovements();
@@ -38,24 +38,26 @@ namespace BetterPECLE_v3
             }*/
             //object result = Executor.Execute(new ExecutionParameters("namespace A{ public class B{ public int C() { PECLECODE }}}", "A.B", "C"), "return 1;");
             //object o = ReadFromBinaryFile<GeneticAlgorithmResult>(@"C:\Users\Samuele\Documents\BetterPECLE\v3\Default\0.pecle");
-            //ExtractData(250, 1, @"C:\Users\Samuele\Documents\BetterPECLE\v3", 20, 50, 20, 100);
-            /*List<GeneticAlgorithmResult> results = OpenResults(@"C:\Users\Samuele\Documents\BetterPECLE\v3\Default");
+            //Executor.Execute(new ExecutionParameters(genericCodeWrapper.Replace("TYPE", "int"), "CodeExecutor.Executor", "Execute")," int a = 5; return a / (5-a);");
 
-            double initialMaxFitness = results.Select(x => x.stats[1].MaxFitness).Average();
-            double initialMinFitness = results.Select(x => x.stats[1].MinFitness).Average();
+            ExtractData(40, 250, 5, @"C:\Users\Samuele\Documents\BetterPECLE\v3", 50, 100, 20, 100);
+            /*List<GeneticAlgorithmResult> results = OpenResults(@"C:\Users\Samuele\Documents\BetterPECLE\v3\Test 6 - Valido, primi 50\Default");
+
+            double initialMaxFitness = results.Select(x => x.stats[0].MaxFitness).Average();
+            double initialMinFitness = results.Select(x => x.stats[0].MinFitness).Average();
             double finalMaxFitness = results.Select(x => x.stats[48].MaxFitness).Average();
             double finalMinFitness = results.Select(x => x.stats[48].MinFitness).Average();
 
-            double averageDifference = results.Select(x => x.stats[48].MaxFitness - x.stats[1].MaxFitness).Average();
-
+            double averageDifference = results.Select(x => x.stats[48].MaxFitness - x.stats[0].MaxFitness).Average();
+            
             List<List<double>> relativeErrors = results.Select(x => x.stats.Select(y => (y.executionExceptions + y.compilationErrors + y.failedErrorCorrections) / y.executedEvaluations).ToList()).ToList();
             List<double> relativeErrors2 = relativeErrors.Select(x => x.Average()).ToList();
             double finalRelativeError = relativeErrors2.Average();
             
-            double errorImprovement = results.Select(x => (x.stats[48].generationErrors / x.stats[48].executedEvaluations) - (x.stats[0].generationErrors / x.stats[0].executedEvaluations)).Average();
+            double errorDifference = results.Select(x => (x.stats[48].generationErrors / x.stats[48].executedEvaluations) - (x.stats[0].generationErrors / x.stats[0].executedEvaluations)).Average();
             
             GeneticAlgorithmResult averageResult = AverageResults(results);*/
-            List<GeneticAlgorithmResult> results = OpenResults(@"C:\Users\Samuele\Documents\BetterPECLE\v3\PECLE");
+            /*List<GeneticAlgorithmResult> results = OpenResults(@"C:\Users\Samuele\Documents\BetterPECLE\v3\PECLE");
             List<string> lines = new List<string>();
 
             for(int i = 0; i < results[0].stats.Count; i++)
@@ -72,7 +74,22 @@ namespace BetterPECLE_v3
                 lines.Add(line);
             }
 
-            File.WriteAllLines(@"C:\Users\Samuele\Documents\BetterPECLE\v3\PECLE.csv", lines.Select(x=> x.ToString()).ToArray());
+            File.WriteAllLines(@"C:\Users\Samuele\Documents\BetterPECLE\v3\PECLE.csv", lines.Select(x=> x.ToString()).ToArray());*/
+            /*List<GeneticAlgorithmResult> results = OpenResults(@"C:\Users\Samuele\Documents\BetterPECLE\v3\Test 6 - Valido, primi 50\Default");
+            List<string> lines = new List<string>();
+
+            for(int i = 0; i < results[0].stats.Count; i++)
+            {
+                string line = "";
+                line += results.Select(x => x.stats[i].AverageFitness).Average() + "\t";
+                line += results.Select(x => x.stats[i].MaxFitness).Average() + "\t";
+                line += results.Select(x => x.stats[i].MinFitness).Average() + "\t";
+
+                line += results.Select(x => x.stats[i].generationErrors / x.stats[i].executedEvaluations).Average() + "\t";
+                lines.Add(line);
+            }
+
+            File.WriteAllLines(@"C:\Users\Samuele\Documents\BetterPECLE\v3\Default_Fitness.csv", lines.Select(x=> x.ToString()).ToArray());*/
         }
 
         private static List<GeneticAlgorithmResult> OpenResults(string path)
@@ -118,14 +135,13 @@ namespace BetterPECLE_v3
             return averageResult;
         }
 
-        private static void ExtractData(int executionNumber, int partitionSize, string path, int populationSize, int generationNumber, int initialChromosomeSize, int maximumChromosomeSize)
+        private static void ExtractData(int initialNumber, int executionNumber, int partitionSize, string path, int populationSize, int generationNumber, int initialChromosomeSize, int maximumChromosomeSize)
         {
             List<GeneticAlgorithmResult> pecleResults = new List<GeneticAlgorithmResult>();
             List<GeneticAlgorithmResult> pecleResults_NoImprovements = new List<GeneticAlgorithmResult>();
             int executionCount = 0;
-            for (int i = 0; i < executionNumber; i++)
+            for (int i = initialNumber; i < executionNumber; i++)
             {
-
                 executionCount++;
                 int elitismSize = GrammaticalEvolution.random.Next(1, 5);
                 int tournamentSize = GrammaticalEvolution.random.Next(2, 6);
@@ -156,7 +172,7 @@ namespace BetterPECLE_v3
         {
             using (Stream stream = File.Open(filePath, append ? FileMode.Append : FileMode.Create))
             {
-                var binaryFormatter = new System.Runtime.Serialization.Formatters.Binary.BinaryFormatter();
+                var binaryFormatter = new BinaryFormatter();
                 binaryFormatter.Serialize(stream, objectToWrite);
             }
         }
@@ -216,7 +232,7 @@ namespace BetterPECLE_v3
         }
 
         public OneMaxGO() { }
-        
+
 
         protected OneMaxGO(SerializationInfo info, StreamingContext context)
         {
@@ -303,8 +319,8 @@ namespace BetterPECLE_v3
                 }},
                 { "loop", new List<ProductionRule>()
                 {
-                    new ProductionRule((Terminal)"while(",(NonTerminal)"condition",(Terminal)")\n{\n",(NonTerminal)"code",(Terminal)"}"),
-                    new ProductionRule((Terminal)"do\n{", (NonTerminal)"code", (Terminal)"}while(",(NonTerminal)"condition",(Terminal)");"),
+                    new ProductionRule((Terminal)"while(", new ObjectFunction<OneMaxGO>(go => CheckIfAlwaysTrue(go)), (Terminal)")\n{\n",(NonTerminal)"code", (Terminal)"}"),
+                    new ProductionRule((Terminal)"do\n{", (NonTerminal)"code", (Terminal)"}\nwhile(",new ObjectFunction<OneMaxGO>(go => CheckIfAlwaysTrue(go)), (Terminal)");"),
                     new ProductionRule(new ObjectFunction<OneMaxGO>(go => CreateForLoop(go)))
                 }},
                 { "unusedVariables", new List<ProductionRule>()
@@ -364,6 +380,26 @@ namespace BetterPECLE_v3
             }
 
             return new Tuple<int, bool>(calculatedValue, canExecute);
+        }
+
+        private static ProductionRule CheckIfAlwaysTrue(OneMaxGO go)
+        {
+            string code = go.ConvertToCode((NonTerminal)"condition");
+            bool canExecute = !code.Contains("a") && !code.Contains("b") && !code.Contains("c") && !code.Contains("d") && !code.Contains("e") && !code.Contains("f");
+            ExecutionParameters parameters = new ExecutionParameters(genericCodeWrapper.Replace("TYPE", "bool"), "CodeExecutor.Executor", "Execute");
+
+            if (canExecute)
+            {
+                bool result = (bool)Executor.Execute(parameters, "return " + code + ";");
+                go.ConvertToCode(new ErrorCheck(g => result));
+                return new ProductionRule(new Terminal(code));
+                //If the value is always false, there can't be an infine loop (although a loop that is never executed is useless)
+            }
+            else//If the code contains variables, by definition its value isn't constant
+            {
+                return new ProductionRule(new Terminal(code));
+            }
+
         }
 
         private static ProductionRule CreateForLoop(OneMaxGO go)
