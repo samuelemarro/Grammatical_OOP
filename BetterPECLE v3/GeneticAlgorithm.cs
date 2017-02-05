@@ -152,7 +152,7 @@ namespace BetterPECLE_v3
                 generation.Stats.executedEvaluations++;
                 chromosome.ReEvaluate = false;
 
-                GrammaticalEvolution newGE = (GrammaticalEvolution)DeepClone(GE);
+                GrammaticalEvolution newGE = GE.GetClone();
                 string code = null;
                 object result = null;
                 Exception generationException = null;
@@ -196,20 +196,6 @@ namespace BetterPECLE_v3
                 if (generationException == null && compilationErrors == null && executionException == null)
                     chromosome.BackupCodons = chromosome.ToList();//If the compilation was successful the codons are copied to the backupCodons
             }
-        }
-
-        private object DeepClone(object initialObject)
-        {
-            BinaryFormatter formatter = new BinaryFormatter();
-            MemoryStream stream = new MemoryStream();
-
-            formatter.Serialize(stream, initialObject);
-
-            stream.Seek(0, SeekOrigin.Begin);
-
-            object result = formatter.Deserialize(stream);
-            stream.Dispose();
-            return result;
         }
 
         public object Execute(string code)

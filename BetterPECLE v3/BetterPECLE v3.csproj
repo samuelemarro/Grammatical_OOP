@@ -57,6 +57,7 @@
     <Compile Include="GrammaticalObject.cs" />
     <Compile Include="IsolatedEnvironment.cs" />
     <Compile Include="IsolatedExecutor.cs" />
+    <Compile Include="LocalityTest.cs" />
     <Compile Include="Mutation.cs" />
     <Compile Include="NonTerminal.cs" />
     <Compile Include="ObjectAction.cs" />

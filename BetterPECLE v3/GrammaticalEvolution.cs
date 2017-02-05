@@ -5,10 +5,9 @@ using System.Linq;
 namespace BetterPECLE_v3
 {
     [Serializable]
-    public class GrammaticalEvolution
+    public class GrammaticalEvolution : ICloneable
     {
         public ProductionRule StartingProductionRule { get; set; }
-        public Dictionary<string, dynamic> Persistence { get; set; }
 
         public GrammaticalObject StartingGO { get; set; }
 
@@ -25,7 +24,7 @@ namespace BetterPECLE_v3
         {
             _genome = genome;
             _currentGenerationStats = currentGenerationStats;
-            
+
             string code = "";
 
             bool compileAgain = true;
@@ -198,6 +197,30 @@ namespace BetterPECLE_v3
             }
 
             return _genome[codonPosition];
+        }
+
+        public object Clone()
+        {
+            return GetClone();
+        }
+
+        public GrammaticalEvolution GetClone()
+        {
+            GrammaticalEvolution ge = new GrammaticalEvolution();
+            if (BluePrintGOs != null)
+            {
+                ge.BluePrintGOs = new List<GrammaticalObject>();
+                foreach (GrammaticalObject go in BluePrintGOs)
+                {
+                    ge.BluePrintGOs.Add(go.GetClone());
+                }
+            }
+            ge.codonPosition = codonPosition;
+            ge.StartingGO = StartingGO == null ? null : StartingGO.GetClone();
+            ge.StartingProductionRule = StartingProductionRule == null ? null : new ProductionRule(StartingProductionRule.ToArray());
+            ge._currentGenerationStats = _currentGenerationStats == null ? null : _currentGenerationStats.GetClone();
+            ge._genome = _genome == null ? null : _genome.GetClone();
+            return ge;
         }
 
         [Serializable]

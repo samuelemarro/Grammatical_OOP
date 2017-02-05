@@ -5,7 +5,7 @@ using System.Linq;
 namespace BetterPECLE_v3
 {
     [Serializable]
-    public abstract class GrammaticalObject : Dictionary<string, List<ProductionRule>>
+    public abstract class GrammaticalObject : Dictionary<string, List<ProductionRule>>, ICloneable
     {
         public abstract Dictionary<string, List<ProductionRule>> GetInitialProductionRules();
 
@@ -92,7 +92,11 @@ namespace BetterPECLE_v3
 
             return stackTrace;
         }
-        
+
+        public object Clone()
+        {
+            return GetClone();
+        }
 
         public class BluePrintGONotFound : Exception
         {

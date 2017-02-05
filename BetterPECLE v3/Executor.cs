@@ -48,13 +48,13 @@ namespace BetterPECLE_v3
         {
             string newCode = parameters.BluePrintCode.Replace("PECLECODE", code);
             executions++;
+            
             if (executions > maxExecutions)
             {
                 environment.Dispose();
                 environment = new IsolatedEnvironment();
                 executions = 0;
             }
-
             return environment.Value.Execute(parameters, newCode);
         }
 

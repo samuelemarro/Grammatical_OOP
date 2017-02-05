@@ -13,9 +13,22 @@ namespace BetterPECLE_v3
     class Program
     {
         public const string genericCodeWrapper = "namespace CodeExecutor{public class Executor{public TYPE Execute(){\n PECLECODE \n}}}";
+        public const string oneMaxCodeWrapper = "namespace CodeExecutor{public class Executor{public bool[] Execute(){\n bool[] grid = new bool[64]; int a = 0; int b = 0; int c = 0;\n PECLECODE return grid;\n}}}";
 
         static void Main(string[] args)
         {
+            GrammaticalEvolution ge_noImprovements = new GrammaticalEvolution();
+            ge_noImprovements.BluePrintGOs = new List<GrammaticalObject>() { new OneMaxGO_NoImprovements() };
+            ge_noImprovements.StartingGO = new OneMaxGO_NoImprovements();
+            ge_noImprovements.StartingProductionRule = new ProductionRule(new NonTerminal("code"));
+
+            GrammaticalEvolution ge = new GrammaticalEvolution();
+            ge.BluePrintGOs = new List<GrammaticalObject>() { new OneMaxGO() };
+            ge.StartingGO = new OneMaxGO();
+            ge.StartingProductionRule = new ProductionRule(new NonTerminal("code"));
+
+            LocalityTest t = new LocalityTest(ge_noImprovements, ge, Calculator, new ExecutionParameters(oneMaxCodeWrapper, "CodeExecutor.Executor", "Execute"));
+            t.ExecuteTest(10, 5, 64,-1, true, true);
             /*GrammaticalEvolution ge = new GrammaticalEvolution();
             ge.BluePrintGOs = new List<GrammaticalObject>() { new OneMaxGO_NoImprovements() };
             ge.StartingGO = new OneMaxGO_NoImprovements();
@@ -40,7 +53,7 @@ namespace BetterPECLE_v3
             //object o = ReadFromBinaryFile<GeneticAlgorithmResult>(@"C:\Users\Samuele\Documents\BetterPECLE\v3\Default\0.pecle");
             //Executor.Execute(new ExecutionParameters(genericCodeWrapper.Replace("TYPE", "int"), "CodeExecutor.Executor", "Execute")," int a = 5; return a / (5-a);");
 
-            ExtractData(40, 250, 5, @"C:\Users\Samuele\Documents\BetterPECLE\v3", 50, 100, 20, 100);
+            //ExtractData(40, 250, 5, @"C:\Users\Samuele\Documents\BetterPECLE\v3", 50, 100, 20, 100);
             /*List<GeneticAlgorithmResult> results = OpenResults(@"C:\Users\Samuele\Documents\BetterPECLE\v3\Test 6 - Valido, primi 50\Default");
 
             double initialMaxFitness = results.Select(x => x.stats[0].MaxFitness).Average();
@@ -215,6 +228,7 @@ namespace BetterPECLE_v3
                 return -1;
             return (double)(((bool[])result).Count(x => x)) / (double)(((bool[])result).Length);
         }
+
     }
 
     [Serializable]
