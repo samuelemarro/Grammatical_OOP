@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace BetterPECLE_v3
 {
     [Serializable]
-    public struct GeneticAlgorithmResult
+    public class GeneticAlgorithmResult
     {
         public List<GenerationStats> stats;
 

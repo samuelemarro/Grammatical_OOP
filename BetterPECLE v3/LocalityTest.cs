@@ -1,16 +1,15 @@
 ﻿using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace BetterPECLE_v3
 {
-    /*
-    Si genera un cromosoma casuale e lo si valuta senza applicare correzioni. Si fanno delle modifiche casuali
-    e si 
-    */
+
     public class LocalityTest
     {
         public GrammaticalEvolution GE1 { get; private set; }
@@ -26,8 +25,8 @@ namespace BetterPECLE_v3
             Parameters = parameters;
         }
 
-        public void ExecuteTest(int testSize, int mutatedIndividuals, int initialChromosomeSize, double failureFitnessValue, bool useGE1ForBase, bool includeFailedCorrections)
-        { 
+        public Tuple<List<double>, List<double>> ExecuteTest(int testnumber, int testSize, int mutatedIndividuals, int initialChromosomeSize, double failureFitnessValue, bool useGE1ForBase, bool includeFailedCorrections)
+        {
             List<double> localityResults1 = new List<double>();
             List<double> localityResults2 = new List<double>();
             for (int i = 0; i < testSize; i++)
@@ -40,7 +39,7 @@ namespace BetterPECLE_v3
                     GrammaticalEvolution baseGE = (useGE1ForBase ? GE1 : GE2).GetClone();
                     baseFitness = Evaluate(baseChromosome, true, baseGE).Item1;
                 }
-                for (int j = 0; j < mutatedIndividuals; j++)//TODO: Controllare che salvi (aggiornamento: non lo fa). Perché le differenze del 2 è di 1?.
+                for (int j = 0; j < mutatedIndividuals; j++)//TODO: Perché le differenze del 2 è di 1?.
                 {
                     Chromosome mutatedChromosome1 = SingleMutation(baseChromosome);
                     mutatedChromosome1.BackupCodons = baseChromosome.ToList();
@@ -48,14 +47,33 @@ namespace BetterPECLE_v3
 
                     Tuple<double, bool> result1 = Evaluate(mutatedChromosome1, false, GE1);
                     Tuple<double, bool> result2 = Evaluate(mutatedChromosome2, false, GE2);
+                    double minDistance = (double)1 / 64;
 
-                    if (result1.Item1 != baseFitness /*&& (!result1.Item2 || (includeFailedCorrections && result1.Item2))*/)
-                        localityResults1.Add(Math.Abs(result1.Item1 - baseFitness));
-                    if (result2.Item1 != baseFitness /*&& (!result2.Item2 || (includeFailedCorrections && result2.Item2))*/)
-                        localityResults2.Add(Math.Abs(result2.Item1 - baseFitness));
+                    localityResults1.Add(Math.Abs(result1.Item1 - baseFitness - minDistance));
 
+                    double secondResult = result2.Item2 ? baseFitness : result2.Item1;
+                    localityResults2.Add(Math.Abs(secondResult - baseFitness - minDistance));
                 }
+                Console.WriteLine(i + " out of " + testSize);
             }
+            Console.WriteLine("Media 1:" + localityResults1.Average());
+            Console.WriteLine("Media 2:" + localityResults2.Average());
+            Console.WriteLine("Miglioramento:" + ((localityResults1.Average() - localityResults2.Average()) / localityResults1.Average()));
+            return new Tuple<List<double>, List<double>>(localityResults1, localityResults2);
+            /*string percorso = @"C:\Users\Samuele\Documents\BetterPECLE\v3\Studio località\";
+            //string avviso = "ATTENZIONE: QUESTI RISULTATI SONO STATI DEFINITI PREVENTIVAMENTE COME TEST.\n" +
+            //    "AL FINE DI RISPETTARE L'ETICA SCIENTIFICA, NON USARE QUESTI DATI IN NESSUNA PUBBLICAZIONE.\n\n";
+
+            double miglioramento = ((localityResults1.Average() - localityResults2.Average()) / localityResults1.Average());
+
+            string spiegazione = "I seguenti dati indicano la differenza di fitness medio per mutazione. Più la differenza\n" +
+                "è bassa, più la rappresentazione è locale.\n\n";
+            File.WriteAllText(percorso + "Studio" + testnumber + ".txt",
+                spiegazione + "Media default: " + localityResults1.Average() +
+                "\nDeviazione Standard: " + StdDev(localityResults1) +
+                "\nMedia PECLE: " + localityResults2.Average() +
+                "\nDeviazione Standard: " + StdDev(localityResults2) +
+                "\nMiglioramento: " + miglioramento);*/
         }
         private Tuple<double, bool> Evaluate(Chromosome chromosome, bool saveBackupCodons, GrammaticalEvolution ge)
         {
@@ -69,7 +87,7 @@ namespace BetterPECLE_v3
 
             try
             {
-                code = newGE.Generate(chromosome, s);
+                code = newGE.Generate(chromosome, s).Item1;
             }
             catch (GrammaticalEvolution.ErrorCorrectionFailedException e)
             {
@@ -79,7 +97,6 @@ namespace BetterPECLE_v3
             {
                 generationException = e;
             }
-
             if (generationException == null)
             {
                 try
@@ -96,7 +113,7 @@ namespace BetterPECLE_v3
                 }
             }
 
-            if (generationException != null && compilationErrors != null && executionException != null && saveBackupCodons)
+            if (generationException == null && compilationErrors == null && executionException == null && saveBackupCodons)
             {
                 chromosome.BackupCodons = chromosome.ToList();
             }
@@ -108,6 +125,11 @@ namespace BetterPECLE_v3
             Chromosome newChromosome = chromosome.GetClone();
             newChromosome[GrammaticalEvolution.random.Next(chromosome.Count)] = (byte)GrammaticalEvolution.random.Next(0, 256);
             return newChromosome;
+        }
+        public static double StdDev(IEnumerable<double> values)
+        {
+            double avg = values.Average();
+            return Math.Sqrt(values.Average(v => Math.Pow(v - avg, 2)));
         }
     }
 }

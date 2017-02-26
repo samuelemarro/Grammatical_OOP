@@ -7,6 +7,10 @@ using System.Security.Permissions;
 using System.Linq;
 using System.IO;
 using System.Runtime.Serialization.Formatters.Binary;
+using System.Media;
+using System.Threading;
+using System.Diagnostics;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace BetterPECLE_v3
 {
@@ -17,7 +21,77 @@ namespace BetterPECLE_v3
 
         static void Main(string[] args)
         {
-            GrammaticalEvolution ge_noImprovements = new GrammaticalEvolution();
+            /*string p = @"C:\Users\Samuele\Documents\BetterPECLE\v3\Studio località\Studio";
+            List<double> valori1 = new List<double>();
+            List<double> valori2 = new List<double>();
+            for (int i = 0; i < 20; i++)
+            {
+                //valori.Add(OttieniMiglioramento(p + i + ".txt"));
+                valori1.Add(OttieniDefault(p + i + ".txt"));
+                valori2.Add(OttieniPECLE(p + i + ".txt"));
+            }
+
+            double media1 = valori1.Average();
+            double media2 = valori2.Average();
+            double miglioramento = (media1 - media2) / media1;
+            */
+            /*var a = ReadFromBinaryFile<Tuple<GeneticAlgorithmResult,GeneticAlgorithmResult>>(@"C:\Users\Samuele\Documents\BetterPECLE\v3\Studio fitness\Test 2.peclefitness");
+            double averageGenerationErrors = a.Item2.stats.Select(x => x.generationErrors / x.executedEvaluations).Average();
+            a = null;*/
+
+            /*List<string> files = Directory.EnumerateFiles(@"C:\Users\Samuele\Documents\BetterPECLE\v3\Prova mutazione").ToList();
+            List<GeneticAlgorithmResult> results1 = new List<GeneticAlgorithmResult>();
+            List<GeneticAlgorithmResult> results2 = new List<GeneticAlgorithmResult>();
+            foreach (string file in files)
+            {
+                Tuple<GeneticAlgorithmResult, GeneticAlgorithmResult> t = ReadFromBinaryFile<Tuple<GeneticAlgorithmResult, GeneticAlgorithmResult>>(file);
+                results1.Add(t.Item1);
+                results2.Add(t.Item2);
+            }
+
+            object[][] values = new object[results1[0].stats.Count][];
+
+            for (int i = 0; i < results1[0].stats.Count; i++)
+            {
+                values[i] = new object[]
+                {
+                    results1.Select(x => x.stats[i].AverageFitness).Average(),
+                    results1.Select(x=> x.stats[i].MaxFitness).Average(),
+                    results1.Select(x=>x.stats[i].MinFitness).Average(),
+                    "",
+                    results2.Select(x=> x.stats[i].AverageFitness).Average(),
+                    results2.Select(x=>x.stats[i].MaxFitness).Average(),
+                    results2.Select(x=>x.stats[i].MinFitness).Average(),
+                    "",
+                    results1.Select(x=> x.stats[i].compilationErrors / x.stats[i].executedEvaluations).Average(),
+                    results1.Select(x=> x.stats[i].executionExceptions / x.stats[i].executedEvaluations).Average(),
+                    results1.Select(x=> x.stats[i].failedErrorCorrections / x.stats[i].executedEvaluations).Average(),
+                    results1.Select(x=> x.stats[i].generationErrors / x.stats[i].executedEvaluations).Average(),
+                    "",
+                    results2.Select(x=> x.stats[i].compilationErrors / x.stats[i].executedEvaluations).Average(),
+                    results2.Select(x=> x.stats[i].executionExceptions / x.stats[i].executedEvaluations).Average(),
+                    results2.Select(x=> x.stats[i].failedErrorCorrections / x.stats[i].executedEvaluations).Average(),
+                    results2.Select(x=> x.stats[i].generationErrors / x.stats[i].executedEvaluations).Average(),
+                };
+            }
+
+            SaveToCSV(@"C:\Users\Samuele\Documents\BetterPECLE\v3\Studio fitness\AnalisiDati.csv", "\t", values);
+            */
+            int executionNumber = 1;
+            
+
+            if (args.Length > 0)
+                executionNumber = int.Parse(args[0].Substring(1));
+
+
+            var results = ExtractData(50, 200, 256);
+            executionNumber++;
+
+            WriteToBinaryFile(@"C:\Users\Samuele\Documents\BetterPECLE\v3\Prova mutazione\Test " + executionNumber + ".peclefitness", results);
+           
+            PlaySound();
+            Restart(executionNumber);
+            /*GrammaticalEvolution ge_noImprovements = new GrammaticalEvolution();
             ge_noImprovements.BluePrintGOs = new List<GrammaticalObject>() { new OneMaxGO_NoImprovements() };
             ge_noImprovements.StartingGO = new OneMaxGO_NoImprovements();
             ge_noImprovements.StartingProductionRule = new ProductionRule(new NonTerminal("code"));
@@ -26,9 +100,43 @@ namespace BetterPECLE_v3
             ge.BluePrintGOs = new List<GrammaticalObject>() { new OneMaxGO() };
             ge.StartingGO = new OneMaxGO();
             ge.StartingProductionRule = new ProductionRule(new NonTerminal("code"));
-
+            int iniziale = executionNumber;
             LocalityTest t = new LocalityTest(ge_noImprovements, ge, Calculator, new ExecutionParameters(oneMaxCodeWrapper, "CodeExecutor.Executor", "Execute"));
-            t.ExecuteTest(10, 5, 64,-1, true, true);
+            Tuple<List<double>, List<double>> risultato = t.ExecuteTest(iniziale, 200, 15, 64, -1, true, true);
+
+            executionNumber++;
+
+            WriteToBinaryFile(@"C:\Users\Samuele\Documents\BetterPECLE\v3\Studio località\Test " + executionNumber + ".peclelocality", risultato);
+
+            PlaySound();
+            Restart(executionNumber);*/
+
+
+            /*Dictionary<double, int> distribuzione1 = new Dictionary<double, int>();
+            Dictionary<double, int> distribuzione2 = new Dictionary<double, int>();
+
+            for(int i = 1; i <= 50; i++)
+            {
+                var tuple = ReadFromBinaryFile<Tuple<List<double>, List<double>>>(@"C:\Users\Samuele\Documents\BetterPECLE\v3\Studio località\Test " + i + ".peclelocality");
+                foreach(double d1 in tuple.Item1)
+                {
+                    if (distribuzione1.Keys.Contains(d1))
+                        distribuzione1[d1]++;
+                    else
+                        distribuzione1.Add(d1, 1);
+                }
+                foreach (double d2 in tuple.Item2)
+                {
+                    if (distribuzione2.Keys.Contains(d2))
+                        distribuzione2[d2]++;
+                    else
+                        distribuzione2.Add(d2, 1);
+                }
+            }
+
+            double media1 = distribuzione1.Select(x => x.Key * x.Value).Sum() / (double)distribuzione1.Values.Sum();
+            double media2 = distribuzione2.Select(x => x.Key * x.Value).Sum() / (double)distribuzione2.Values.Sum();
+            */
             /*GrammaticalEvolution ge = new GrammaticalEvolution();
             ge.BluePrintGOs = new List<GrammaticalObject>() { new OneMaxGO_NoImprovements() };
             ge.StartingGO = new OneMaxGO_NoImprovements();
@@ -53,7 +161,6 @@ namespace BetterPECLE_v3
             //object o = ReadFromBinaryFile<GeneticAlgorithmResult>(@"C:\Users\Samuele\Documents\BetterPECLE\v3\Default\0.pecle");
             //Executor.Execute(new ExecutionParameters(genericCodeWrapper.Replace("TYPE", "int"), "CodeExecutor.Executor", "Execute")," int a = 5; return a / (5-a);");
 
-            //ExtractData(40, 250, 5, @"C:\Users\Samuele\Documents\BetterPECLE\v3", 50, 100, 20, 100);
             /*List<GeneticAlgorithmResult> results = OpenResults(@"C:\Users\Samuele\Documents\BetterPECLE\v3\Test 6 - Valido, primi 50\Default");
 
             double initialMaxFitness = results.Select(x => x.stats[0].MaxFitness).Average();
@@ -105,6 +212,27 @@ namespace BetterPECLE_v3
             File.WriteAllLines(@"C:\Users\Samuele\Documents\BetterPECLE\v3\Default_Fitness.csv", lines.Select(x=> x.ToString()).ToArray());*/
         }
 
+        private static void SaveToCSV(string path, string separator, object[][] values)
+        {
+            string file = "";
+            for (int y = 0; y < values.Length; y++)
+            {
+                for (int x = 0; x < values[0].Length; x++)
+                {
+                    file += values[y][x] + separator;
+                }
+                file += "\n";
+            }
+            File.WriteAllText(path, file);
+        }
+
+        private static void Restart(int restartNumber)
+        {
+            string path = System.Reflection.Assembly.GetExecutingAssembly().Location;
+            Process.Start(path, "t" + restartNumber);
+            Environment.Exit(0);
+        }
+
         private static List<GeneticAlgorithmResult> OpenResults(string path)
         {
             List<GeneticAlgorithmResult> results = new List<GeneticAlgorithmResult>();
@@ -148,37 +276,20 @@ namespace BetterPECLE_v3
             return averageResult;
         }
 
-        private static void ExtractData(int initialNumber, int executionNumber, int partitionSize, string path, int populationSize, int generationNumber, int initialChromosomeSize, int maximumChromosomeSize)
+        private static Tuple<GeneticAlgorithmResult, GeneticAlgorithmResult> ExtractData(int populationSize, int generationNumber, int maximumChromosomeSize)
         {
-            List<GeneticAlgorithmResult> pecleResults = new List<GeneticAlgorithmResult>();
-            List<GeneticAlgorithmResult> pecleResults_NoImprovements = new List<GeneticAlgorithmResult>();
-            int executionCount = 0;
-            for (int i = initialNumber; i < executionNumber; i++)
-            {
-                executionCount++;
-                int elitismSize = GrammaticalEvolution.random.Next(1, 5);
-                int tournamentSize = GrammaticalEvolution.random.Next(2, 6);
-                double crossoverProbability = GrammaticalEvolution.random.NextDouble();
-                double mutationProbability = GrammaticalEvolution.random.NextDouble();
-                double duplicationProbability = GrammaticalEvolution.random.NextDouble();
-                double pruningProbability = GrammaticalEvolution.random.NextDouble();
+            int elitismSize = GrammaticalEvolution.random.Next(1, 5);
+            int tournamentSize = GrammaticalEvolution.random.Next(2, 6);
+            double crossoverProbability = GrammaticalEvolution.random.NextDouble();
+            double mutationProbability = GrammaticalEvolution.random.NextDouble();
+            double duplicationProbability = GrammaticalEvolution.random.NextDouble();
+            double pruningProbability = GrammaticalEvolution.random.NextDouble();
+            int initialChromosomeSize = GrammaticalEvolution.random.Next(64, maximumChromosomeSize);
 
-                pecleResults.Add(PECLETest(populationSize, generationNumber, initialChromosomeSize, maximumChromosomeSize, elitismSize, tournamentSize, crossoverProbability, mutationProbability, duplicationProbability, pruningProbability));
-                pecleResults_NoImprovements.Add(PECLETest_NoImprovements(populationSize, generationNumber, initialChromosomeSize, maximumChromosomeSize, elitismSize, tournamentSize, crossoverProbability, mutationProbability, duplicationProbability, pruningProbability));
+            GeneticAlgorithmResult pecleResult = PECLETest(populationSize, generationNumber, initialChromosomeSize, maximumChromosomeSize, elitismSize, tournamentSize, crossoverProbability, mutationProbability, duplicationProbability, pruningProbability);
+            GeneticAlgorithmResult noImprovementsResult = PECLETest_NoImprovements(populationSize, generationNumber, initialChromosomeSize, maximumChromosomeSize, elitismSize, tournamentSize, crossoverProbability, mutationProbability, duplicationProbability, pruningProbability);
 
-
-                if (executionCount == partitionSize)
-                {
-                    WriteToBinaryFile(path + "\\PECLE\\" + (i / partitionSize) + ".pecle", pecleResults);
-                    WriteToBinaryFile(path + "\\Default\\" + (i / partitionSize) + ".pecle", pecleResults_NoImprovements);
-
-                    pecleResults = new List<GeneticAlgorithmResult>();
-                    pecleResults_NoImprovements = new List<GeneticAlgorithmResult>();
-
-                    executionCount = 0;
-                }
-
-            }
+            return new Tuple<GeneticAlgorithmResult, GeneticAlgorithmResult>(pecleResult, noImprovementsResult);
         }
 
         public static void WriteToBinaryFile<T>(string filePath, T objectToWrite, bool append = false)
@@ -228,7 +339,14 @@ namespace BetterPECLE_v3
                 return -1;
             return (double)(((bool[])result).Count(x => x)) / (double)(((bool[])result).Length);
         }
-
+        private static void PlaySound()
+        {
+            for (int i = 0; i < 4; i++)
+            {
+                SystemSounds.Beep.Play();
+                Thread.Sleep(500);
+            }
+        }
     }
 
     [Serializable]

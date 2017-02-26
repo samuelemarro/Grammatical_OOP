@@ -20,7 +20,7 @@ namespace BetterPECLE_v3
 
         internal static Random random = new Random();
 
-        internal string Generate(Chromosome genome, GenerationStats currentGenerationStats)
+        internal Tuple<string, bool> Generate(Chromosome genome, GenerationStats currentGenerationStats)
         {
             _genome = genome;
             _currentGenerationStats = currentGenerationStats;
@@ -70,7 +70,7 @@ namespace BetterPECLE_v3
 
             if (correctionApplied)
                 _currentGenerationStats.successfulErrorCorrections++;
-            return code;
+            return new Tuple<string, bool>(code, correctionApplied);
         }
 
         private static bool CanCorrectChromosome(Chromosome chromosome, int initialPosition, int finalPosition)

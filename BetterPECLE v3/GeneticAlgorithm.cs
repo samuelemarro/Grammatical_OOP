@@ -20,7 +20,31 @@ namespace BetterPECLE_v3
         public Selection Selection { get; }
         public ExecutionParameters Parameters { get; }
 
-        public bool SaveChromosomes { get; set; }
+        public bool SaveChromosomes
+        {
+            get
+            {
+                return saveChromosomes;
+            }
+            set
+            {
+                saveChromosomes = value;
+            }
+        }
+        private bool saveChromosomes = false;
+
+        public bool MutateAfterCorrection
+        {
+            get
+            {
+                return mutateAfterCorrection;
+            }
+            set
+            {
+                mutateAfterCorrection = value;
+            }
+        }
+        private bool mutateAfterCorrection = true;
 
         public GeneticAlgorithm(int elitismSize, GrammaticalEvolution ge, FitnessCalculator fitnessCalculator, Selection selection, Crossover crossover, Mutation mutation, Population population, ExecutionParameters parameters)
         {
@@ -41,7 +65,7 @@ namespace BetterPECLE_v3
 
             //Evaluate and save the results of the first generation
 
-            Evaluate(Population.CurrentGeneration);
+            Evaluate(Population.CurrentGeneration, mutationProbability);
 
             Population.CurrentGeneration.Stats.fitnessValues = Population.CurrentGeneration.Select(x => x.Fitness.Value).ToList();
             Population.CurrentGeneration.Stats.bestChromosome = Population.CurrentGeneration.OrderByDescending(x => x.Fitness).First();
@@ -84,7 +108,7 @@ namespace BetterPECLE_v3
                     Mutation.Mutate(c, mutationProbability);
                 }
 
-                Evaluate(newGeneration);
+                Evaluate(newGeneration, mutationProbability);
 
                 Prune(newGeneration, pruningProbability);
                 Duplicate(newGeneration, duplicationProbability);
@@ -93,9 +117,9 @@ namespace BetterPECLE_v3
 
                 newGeneration.Stats.fitnessValues = newGeneration.Select(x => x.Fitness.Value).ToList();
                 newGeneration.Stats.bestChromosome = newGeneration.OrderByDescending(x => x.Fitness).First().GetClone();
-                
+
                 Population.Add(newGeneration);
-                
+
                 //We remove the chromosomes of older generations (but store their fitness)
                 if (!SaveChromosomes && Population.Count > 1)
                     Population[Population.Count - 2].Clear();
@@ -143,14 +167,12 @@ namespace BetterPECLE_v3
 
         }
 
-        private void Evaluate(Generation generation)
+        private void Evaluate(Generation generation, double mutationProbability)
         {
             foreach (Chromosome chromosome in generation)
             {
                 if (chromosome.Fitness.HasValue && !chromosome.ReEvaluate)
                     continue;
-                generation.Stats.executedEvaluations++;
-                chromosome.ReEvaluate = false;
 
                 GrammaticalEvolution newGE = GE.GetClone();
                 string code = null;
@@ -161,7 +183,19 @@ namespace BetterPECLE_v3
 
                 try
                 {
-                    code = newGE.Generate(chromosome, generation.Stats);
+                    Tuple<string, bool> generationResult;
+                    do
+                    {
+                        chromosome.ReEvaluate = false;
+                        generation.Stats.executedEvaluations++;
+                        generationResult = newGE.Generate(chromosome, generation.Stats);
+                        if (generationResult.Item2 && MutateAfterCorrection)//If there was a correction and it is enabled, mutate and repeat the generation
+                        {
+                            Mutation.Mutate(chromosome, mutationProbability);
+                            chromosome.ReEvaluate = true;
+                        }
+                    }
+                    while (chromosome.ReEvaluate);
                 }
                 catch (GrammaticalEvolution.ErrorCorrectionFailedException e)
                 {
