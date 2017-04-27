@@ -25,7 +25,7 @@ namespace BetterPECLE_v3
             Parameters = parameters;
         }
 
-        public Tuple<List<double>, List<double>> ExecuteTest(int testnumber, int testSize, int mutatedIndividuals, int initialChromosomeSize, double failureFitnessValue, bool useGE1ForBase, bool includeFailedCorrections)
+        public Tuple<List<double>,List<double>> ExecuteTest(int testnumber, int testSize, int mutatedIndividuals, int initialChromosomeSize, double failureFitnessValue, bool useGE1ForBase, bool includeFailedCorrections)
         {
             List<double> localityResults1 = new List<double>();
             List<double> localityResults2 = new List<double>();
@@ -87,7 +87,7 @@ namespace BetterPECLE_v3
 
             try
             {
-                code = newGE.Generate(chromosome, s).Item1;
+                code = newGE.Generate(chromosome, s);
             }
             catch (GrammaticalEvolution.ErrorCorrectionFailedException e)
             {

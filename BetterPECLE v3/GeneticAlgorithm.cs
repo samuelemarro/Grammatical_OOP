@@ -20,31 +20,7 @@ namespace BetterPECLE_v3
         public Selection Selection { get; }
         public ExecutionParameters Parameters { get; }
 
-        public bool SaveChromosomes
-        {
-            get
-            {
-                return saveChromosomes;
-            }
-            set
-            {
-                saveChromosomes = value;
-            }
-        }
-        private bool saveChromosomes = false;
-
-        public bool MutateAfterCorrection
-        {
-            get
-            {
-                return mutateAfterCorrection;
-            }
-            set
-            {
-                mutateAfterCorrection = value;
-            }
-        }
-        private bool mutateAfterCorrection = true;
+        public bool SaveChromosomes { get; set; }
 
         public GeneticAlgorithm(int elitismSize, GrammaticalEvolution ge, FitnessCalculator fitnessCalculator, Selection selection, Crossover crossover, Mutation mutation, Population population, ExecutionParameters parameters)
         {
@@ -65,7 +41,9 @@ namespace BetterPECLE_v3
 
             //Evaluate and save the results of the first generation
 
-            Evaluate(Population.CurrentGeneration, mutationProbability);
+            Console.WriteLine("Eseguendo generazione iniziale");
+
+            Evaluate(Population.CurrentGeneration);
 
             Population.CurrentGeneration.Stats.fitnessValues = Population.CurrentGeneration.Select(x => x.Fitness.Value).ToList();
             Population.CurrentGeneration.Stats.bestChromosome = Population.CurrentGeneration.OrderByDescending(x => x.Fitness).First();
@@ -73,6 +51,7 @@ namespace BetterPECLE_v3
             result.stats.Add(Population.CurrentGeneration.Stats);
             for (int i = 1; i < generations; i++)
             {
+                Console.WriteLine("Eseguendo generazione " + (i + 1) + " di " + generations);
                 Generation newGeneration = new Generation();
 
                 //Finds all the individuals with a valid fitness and takes the best ones
@@ -108,7 +87,7 @@ namespace BetterPECLE_v3
                     Mutation.Mutate(c, mutationProbability);
                 }
 
-                Evaluate(newGeneration, mutationProbability);
+                Evaluate(newGeneration);
 
                 Prune(newGeneration, pruningProbability);
                 Duplicate(newGeneration, duplicationProbability);
@@ -117,9 +96,9 @@ namespace BetterPECLE_v3
 
                 newGeneration.Stats.fitnessValues = newGeneration.Select(x => x.Fitness.Value).ToList();
                 newGeneration.Stats.bestChromosome = newGeneration.OrderByDescending(x => x.Fitness).First().GetClone();
-
+                
                 Population.Add(newGeneration);
-
+                
                 //We remove the chromosomes of older generations (but store their fitness)
                 if (!SaveChromosomes && Population.Count > 1)
                     Population[Population.Count - 2].Clear();
@@ -167,12 +146,14 @@ namespace BetterPECLE_v3
 
         }
 
-        private void Evaluate(Generation generation, double mutationProbability)
+        private void Evaluate(Generation generation)
         {
             foreach (Chromosome chromosome in generation)
             {
                 if (chromosome.Fitness.HasValue && !chromosome.ReEvaluate)
                     continue;
+                generation.Stats.executedEvaluations++;
+                chromosome.ReEvaluate = false;
 
                 GrammaticalEvolution newGE = GE.GetClone();
                 string code = null;
@@ -183,19 +164,7 @@ namespace BetterPECLE_v3
 
                 try
                 {
-                    Tuple<string, bool> generationResult;
-                    do
-                    {
-                        chromosome.ReEvaluate = false;
-                        generation.Stats.executedEvaluations++;
-                        generationResult = newGE.Generate(chromosome, generation.Stats);
-                        if (generationResult.Item2 && MutateAfterCorrection)//If there was a correction and it is enabled, mutate and repeat the generation
-                        {
-                            Mutation.Mutate(chromosome, mutationProbability);
-                            chromosome.ReEvaluate = true;
-                        }
-                    }
-                    while (chromosome.ReEvaluate);
+                    code = newGE.Generate(chromosome, generation.Stats);
                 }
                 catch (GrammaticalEvolution.ErrorCorrectionFailedException e)
                 {
