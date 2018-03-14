@@ -21,7 +21,10 @@ namespace BetterPECLE_v3
 
         static void Main(string[] args)
         {
-            /*string p = @"C:\Users\Samuele\Documents\BetterPECLE\v3\Studio località\Studio";
+            DataExaminer(args[0], args[1]);
+
+            #region PreviousTests
+            /*string p = @"";
             List<double> valori1 = new List<double>();
             List<double> valori2 = new List<double>();
             for (int i = 0; i < 20; i++)
@@ -35,7 +38,7 @@ namespace BetterPECLE_v3
             double media2 = valori2.Average();
             double miglioramento = (media1 - media2) / media1;
             */
-            /*var a = ReadFromBinaryFile<Tuple<GeneticAlgorithmResult,GeneticAlgorithmResult>>(@"C:\Users\Samuele\Documents\BetterPECLE\v3\Studio fitness\Test 2.peclefitness");
+            /*var a = ReadFromBinaryFile<Tuple<GeneticAlgorithmResult,GeneticAlgorithmResult>>(@"");
             double averageGenerationErrors = a.Item2.stats.Select(x => x.generationErrors / x.executedEvaluations).Average();
             a = null;
             */
@@ -50,12 +53,11 @@ namespace BetterPECLE_v3
             var results = ExtractData(50, 200, 256);
             executionNumber++;
 
-            WriteToBinaryFile(@"C:\Users\Samuele\Documents\BetterPECLE\v3\Studio fitness\Test " + executionNumber + ".peclefitness", results);
+            WriteToBinaryFile(@"" + executionNumber + ".peclefitness", results);
 
             PlaySound();
             if (executionNumber < 105)
                 Restart(executionNumber);*/
-            UsaQuestoPerEsaminareIDati();
 
             //var phr = results1.SelectMany(x => x.stats).ToList();
             //var standard = results2.SelectMany(x => x.stats).ToList();
@@ -80,7 +82,7 @@ namespace BetterPECLE_v3
 
             executionNumber++;
 
-            WriteToBinaryFile(@"C:\Users\Samuele\Documents\BetterPECLE\v3\Studio località\Test " + executionNumber + ".peclelocality", risultato);
+            WriteToBinaryFile(@"" + executionNumber + ".peclelocality", risultato);
 
             PlaySound();
             Restart(executionNumber);*/
@@ -91,7 +93,7 @@ namespace BetterPECLE_v3
 
             for(int i = 1; i <= 50; i++)
             {
-                var tuple = ReadFromBinaryFile<Tuple<List<double>, List<double>>>(@"C:\Users\Samuele\Documents\BetterPECLE\v3\Studio località\Test " + i + ".peclelocality");
+                var tuple = ReadFromBinaryFile<Tuple<List<double>, List<double>>>(@"" + i + ".peclelocality");
                 foreach(double d1 in tuple.Item1)
                 {
                     if (distribuzione1.Keys.Contains(d1))
@@ -132,10 +134,10 @@ namespace BetterPECLE_v3
 
             }*/
             //object result = Executor.Execute(new ExecutionParameters("namespace A{ public class B{ public int C() { PECLECODE }}}", "A.B", "C"), "return 1;");
-            //object o = ReadFromBinaryFile<GeneticAlgorithmResult>(@"C:\Users\Samuele\Documents\BetterPECLE\v3\Default\0.pecle");
+            //object o = ReadFromBinaryFile<GeneticAlgorithmResult>(@"");
             //Executor.Execute(new ExecutionParameters(genericCodeWrapper.Replace("TYPE", "int"), "CodeExecutor.Executor", "Execute")," int a = 5; return a / (5-a);");
 
-            /*List<GeneticAlgorithmResult> results = OpenResults(@"C:\Users\Samuele\Documents\BetterPECLE\v3\Test 6 - Valido, primi 50\Default");
+            /*List<GeneticAlgorithmResult> results = OpenResults(@"");
 
             double initialMaxFitness = results.Select(x => x.stats[0].MaxFitness).Average();
             double initialMinFitness = results.Select(x => x.stats[0].MinFitness).Average();
@@ -151,7 +153,7 @@ namespace BetterPECLE_v3
             double errorDifference = results.Select(x => (x.stats[48].generationErrors / x.stats[48].executedEvaluations) - (x.stats[0].generationErrors / x.stats[0].executedEvaluations)).Average();
             
             GeneticAlgorithmResult averageResult = AverageResults(results);*/
-            /*List<GeneticAlgorithmResult> results = OpenResults(@"C:\Users\Samuele\Documents\BetterPECLE\v3\PECLE");
+            /*List<GeneticAlgorithmResult> results = OpenResults(@"");
             List<string> lines = new List<string>();
 
             for(int i = 0; i < results[0].stats.Count; i++)
@@ -168,8 +170,8 @@ namespace BetterPECLE_v3
                 lines.Add(line);
             }
 
-            File.WriteAllLines(@"C:\Users\Samuele\Documents\BetterPECLE\v3\PECLE.csv", lines.Select(x=> x.ToString()).ToArray());*/
-            /*List<GeneticAlgorithmResult> results = OpenResults(@"C:\Users\Samuele\Documents\BetterPECLE\v3\Test 6 - Valido, primi 50\Default");
+            File.WriteAllLines(@"", lines.Select(x=> x.ToString()).ToArray());*/
+            /*List<GeneticAlgorithmResult> results = OpenResults(@"");
             List<string> lines = new List<string>();
 
             for(int i = 0; i < results[0].stats.Count; i++)
@@ -183,12 +185,13 @@ namespace BetterPECLE_v3
                 lines.Add(line);
             }
 
-            File.WriteAllLines(@"C:\Users\Samuele\Documents\BetterPECLE\v3\Default_Fitness.csv", lines.Select(x=> x.ToString()).ToArray());*/
+            File.WriteAllLines(@"", lines.Select(x=> x.ToString()).ToArray());*/
+            #endregion
         }
 
-        static void UsaQuestoPerEsaminareIDati()
+        static void DataExaminer(string loadPath, string savePath)
         {
-            List<string> files = Directory.EnumerateFiles(@"C:\Users\Samuele\Documents\BetterPECLE\v3\Studio fitness").ToList();
+            List<string> files = Directory.EnumerateFiles(loadPath).ToList();
             List<GeneticAlgorithmResult> results1 = new List<GeneticAlgorithmResult>();
             List<GeneticAlgorithmResult> results2 = new List<GeneticAlgorithmResult>();
             foreach (string file in files)
@@ -227,7 +230,7 @@ namespace BetterPECLE_v3
                 };
             }
 
-            SaveToCSV(@"C:\Users\Samuele\Documents\BetterPECLE\v3\Studio fitness\AnalisiDati.csv", "\t", values);
+            SaveToCSV(savePath, "\t", values);
         }
 
         private static void SaveToCSV(string path, string separator, object[][] values)
