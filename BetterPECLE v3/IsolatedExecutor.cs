@@ -4,7 +4,7 @@ using System.CodeDom.Compiler;
 using System.Reflection;
 using System.Threading.Tasks;
 
-namespace BetterPECLE_v3
+namespace Grammatical_OOP
 {
     public class IsolatedExecutor : MarshalByRefObject
     {

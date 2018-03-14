@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace BetterPECLE_v3
+namespace Grammatical_OOP
 {
     [Serializable]
     public class ProductionRule : List<Expression>

@@ -8,7 +8,7 @@ using System.Runtime.Serialization;
 using System.Security.Permissions;
 using System.Threading.Tasks;
 
-namespace BetterPECLE_v3
+namespace Grammatical_OOP
 {
     public static class Executor
     {

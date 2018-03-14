@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.Serialization.Formatters.Binary;
 
-namespace BetterPECLE_v3
+namespace Grammatical_OOP
 {
     public delegate double FitnessCalculator(object result, Exception generationException, CompilerErrorCollection compilationErrors, Exception executionException);
 

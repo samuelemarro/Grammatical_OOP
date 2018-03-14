@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BetterPECLE_v3
+namespace Grammatical_OOP
 {
     public class Population : List<Generation>
     {

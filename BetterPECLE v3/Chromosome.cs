@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace BetterPECLE_v3
+namespace Grammatical_OOP
 {
     [Serializable]
     public class Chromosome : List<byte>

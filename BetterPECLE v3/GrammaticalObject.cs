@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace BetterPECLE_v3
+namespace Grammatical_OOP
 {
     [Serializable]
     public abstract class GrammaticalObject : Dictionary<string, List<ProductionRule>>, ICloneable

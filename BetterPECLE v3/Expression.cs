@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BetterPECLE_v3
+namespace Grammatical_OOP
 {
     [Serializable]
     public abstract class Expression

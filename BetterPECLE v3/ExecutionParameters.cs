@@ -6,7 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BetterPECLE_v3
+namespace Grammatical_OOP
 {
     [Serializable]
     public struct ExecutionParameters

@@ -12,7 +12,7 @@ using System.Threading;
 using System.Diagnostics;
 using static System.Net.Mime.MediaTypeNames;
 
-namespace BetterPECLE_v3
+namespace Grammatical_OOP
 {
     class Program
     {
